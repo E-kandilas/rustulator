@@ -1,35 +1,35 @@
+
+use enums::{Color, FrameType}; // Import the FrameType module
+
+use fltk::*;
 use fltk::{app, button::{self, Button}, frame::Frame, prelude::*, window::Window};
-
-
 use rand::Rng;
 
 fn main() {
-    let app = app::App::default();
-    let mut wind = Window::new(100, 100, 400, 300, "Rustulator");
-    // let mut frame = Frame::new(0, 0, 400, 200, "");
+    let app = fltk::app::App::default().with_scheme(fltk::app::Scheme::Gtk);
+    let mut win = fltk::window::Window::new(100, 100, 400, 300, "Rustulator");
+    let mut frame = fltk::frame::Frame::new(0, 0, 400, 300, "");
+    frame.set_color(fltk::enums::Color::White);
 
-    let mut rand_x: i32 = 10;
-    let mut rand_y: i32 = 210;
+    let mut frame = Frame::new(0, 0, 400, 300, "");
+    frame.set_color(fltk::enums::Color::White);
+    let mut but = Button::new(160, 200, 80, 40, "Click me!");
+    but.set_color(Color::Cyan);
+    but.set_label_color(Color::Red);
+    but.set_frame(FrameType::FlatBox);
+    but.set_color(Color::Blue);
+    but.set_label_size(20);
+    but.set_callback(move |_| frame.set_label("Hello World!"));
 
-    let mut button_0 = Button::new(rand_x, rand_y, 80, 40, "CLICK!");
-
-    button_0.clone().set_callback(move |_| {
-        rand_x = rand::thread_rng().gen_range(0..100);
-        rand_y = rand::thread_rng().gen_range(0..100);
-        button_0.resize(rand_x, rand_y, 80, 40);
-        print!("{}, {}\n", rand_x, rand_y);
+    but.clone().set_callback(move |_| {
+      let mut rng = rand::thread_rng();
+      let x = rng.gen_range(0..=300);
+      let y = rng.gen_range(0..=200);
+      but.resize(x, y, 80, 40);
     });
 
-    let mut button_1 = Button::new(rand_x, rand_y + 50, 80, 40, "MOVE!");
-    button_1.clone().set_callback(move |_| {
-        let new_x = rand::thread_rng().gen_range(0..400);
-        let new_y = rand::thread_rng().gen_range(0..300);
-        button_1.resize(new_x, new_y, 80, 40);
-    });
-
-
-    wind.end();
-    wind.show();
+    win.end();
+    win.show();
     app.run().unwrap();
 }
 
