@@ -71,7 +71,6 @@ fn main() {
           Message::Spaz => {
             let rand_x = rand::thread_rng().gen_range(0..(400 - 80));
             let rand_y = rand::thread_rng().gen_range(0..100);
-            // but.deactivate();
             but.resize(rand_x, rand_y, 80, 40);
             win.redraw();
           }
