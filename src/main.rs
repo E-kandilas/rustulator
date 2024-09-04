@@ -6,21 +6,40 @@ use frame::Frame;
 use rand::Rng;
 // use fltk::app::channel; // Import channel
 
+use self::Message::*;
+
 
 // Define the Message type
 #[derive(Debug, Clone, Copy)]
 enum Message {
-    Spaz,
+  Spaz,
+  Num0, Num1, Num2, Num3, Num4,
+  Num5, Num6, Num7, Num8, Num9,
+  Back, Mult, Div, 
+}
+
+impl Message {
+  pub fn iterator() -> std::slice::Iter<'static, Message> {
+      static MESSAGES: [Message; 14] = [Spaz,
+      Num0, Num1, Num2, Num3, Num4,
+      Num5, Num6, Num7, Num8, Num9,
+      Back, Mult, Div];
+      MESSAGES.iter()
+  }
 }
 
 fn main() {
-    let app = app::App::default().with_scheme(fltk::app::Scheme::Gleam);
+    let app = app::App::default().with_scheme(fltk::app::Scheme::Gtk);
 
     let mut win = fltk::window::Window::new(100, 100, 400, 300, "Rustulator");
     let mut frame = fltk::frame::Frame::new(0, 0, 400, 300, "");
     frame.set_color(fltk::enums::Color::White);
 
     let (sender, reciever) = app::channel::<Message>();
+
+    for buttonType in Message::iterator() {
+      println!("{:?}", buttonType)
+    }
 
 
     let mut frame = Frame::new(0, 0, 400, 300, "");
