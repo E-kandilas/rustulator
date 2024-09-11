@@ -71,6 +71,12 @@ impl Message {
 }
 
 fn main() {
+    // CONSTANTS
+    const BUTT_WIDTH: i32 = 80;
+    const BUTT_HEIGHT: i32 = 40;
+    const EDGE_DIST: i32 = 80;
+
+
     let app = app::App::default().with_scheme(fltk::app::Scheme::Gtk);
 
     let mut win = fltk::window::Window::new(100, 100, 400, 300, "Rustulator");
@@ -79,17 +85,28 @@ fn main() {
 
     let (sender, reciever) = app::channel::<Message>();
 
-    let mut buttCount = 0;
-    for buttonType in Message::iterator() {
-      let mut buttName = buttCount.to_string();
-      let buttDist = buttCount * 160;
-      if buttCount <= 9 {
-          buttName = buttCount.to_string();
-      } else {
-          buttName = buttonType.to_string();
+    let mut butt_count = 0;
+    let mut butts_per_row = 0;
+    let mut y_offset = 0;
+
+    for button_type in Message::iterator() {
+      butts_per_row += 1;
+      let mut butt_name = butt_count.to_string();
+      
+      if butt_count % 3 == 0 {
+        // butt_dist = 0;
+        butts_per_row = 0;
+        y_offset = y_offset + BUTT_HEIGHT;
       }
-      let mut but = Button::new(160, 200+buttDist, 80, 40,&*buttName );
-      buttCount = buttCount + 1;
+      let butt_dist = EDGE_DIST + (butts_per_row * BUTT_WIDTH);
+      
+      if butt_count <= 9 {
+          butt_name = butt_count.to_string();
+      } else {
+          butt_name = button_type.to_string();
+      }
+      Button::new(butt_dist, y_offset, BUTT_WIDTH, BUTT_HEIGHT,&*butt_name );
+      butt_count = butt_count + 1;
     }
 
 
