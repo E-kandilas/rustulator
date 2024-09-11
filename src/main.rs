@@ -92,6 +92,7 @@ fn main() {
         butt_name = button_type.to_string();
       }
 
+      // Lesson TODO: Why tf do I need to borrow and deref this.
       Button::new(butt_dist, y_offset, BUTT_WIDTH, BUTT_HEIGHT,&*butt_name);
       butt_count = butt_count + 1;
     }
