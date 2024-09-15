@@ -51,7 +51,6 @@ impl Message {
 // TODO:
 // Add All Calculator buttons %,+, -, Look at an actual calculator
 // Look into ways to change the placements of the buttons
-// Begin storing messages and displaying them on the display_frame
 // Add some more constants and variables for window sizes
 
 fn main() {
@@ -60,12 +59,14 @@ fn main() {
     const BUTT_HEIGHT: i32 = 40;
     const EDGE_DIST: i32 = 80;
 
+    // APP
+    let mut display_string = String::new();
 
     let app = app::App::default().with_scheme(fltk::app::Scheme::Gtk);
 
     let mut win = fltk::window::Window::new(100, 100, 400, 400, "Rustulator").center_screen();
     // let mut control_frame = fltk::frame::Frame::new(30, 30, 400, 300, "Control");
-    let mut display_frame =  fltk::frame::Frame::new(40, 10, 300, 30, "Display").with_label("Begin Typing");
+    let mut display_frame =  fltk::frame::Frame::new(40, 10, 300, 30, "Display").with_label(&display_string);
 
     display_frame.set_color(Color::from_rgb(255, 255, 255));
     display_frame.set_frame(FrameType::BorderBox);
@@ -93,26 +94,48 @@ fn main() {
       }
 
       // Lesson TODO: Why tf do I need to borrow and deref this.
-      Button::new(butt_dist, y_offset, BUTT_WIDTH, BUTT_HEIGHT,&*butt_name);
+      let mut butt = Button::new(butt_dist, y_offset, BUTT_WIDTH, BUTT_HEIGHT,&*butt_name);
+
+      butt.handle(move |b, evt| match evt {
+        Event::Enter => {
+          b.set_color(Color::XtermBgYellow);
+          b.redraw();
+          return true;
+        }
+        Event::Leave => {
+          b.set_color(Color::FrameDefault);
+          b.redraw();
+          return true;
+        }
+        Event::Push => {
+          sender.send(*button_type);
+          return true;
+        }
+        _ => {
+          return false;
+        },
+    });
+
       butt_count = butt_count + 1;
     }
 
 
     win.end();
     win.show();
-    
-    
+
     while app.wait() {
       //Lesson! Look into if lets again and is there another way / what is this syntactic sugar for?
       if let Some(msg) = reciever.recv() {
+        println!("{}", msg);
         match msg {
-          // Message::Spaz => {
-          //   let rand_x = rand::thread_rng().gen_range(0..(400 - 80));
-          //   let rand_y = rand::thread_rng().gen_range(0..100);
-          //   but.resize(rand_x, rand_y, 80, 40);
-          //   win.redraw();
-          // }
-          _ => (), // dont need if all enums are handled btw
+          CE => {
+            display_string.clear();
+            display_frame.set_label(&display_string);
+          },
+          _ => {
+            display_string.push_str(&msg.to_string());
+            display_frame.set_label(&display_string);
+          }
         }
       }
     }
