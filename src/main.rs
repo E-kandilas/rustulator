@@ -89,7 +89,7 @@ fn main() {
   let mut display_frame = fltk::frame::Frame::new(20, 10, 320, DISPLAY_HEIGHT, "Display").with_label(&display_string);
   display_frame.set_pos((win.width() - display_frame.width()) / 2, DISPLAY_MARGIN_TOP); // Center horizontally and set top margin
   display_frame.set_label_size(DISPLAY_FONT_SIZE);
-  display_frame.set_label_color(COLOR_BLACK); 
+  display_frame.set_label_color(COLOR_BLACK);
   display_frame.set_color(COLOR_WHITE);
   display_frame.set_frame(FrameType::RFlatBox);
 
@@ -147,6 +147,42 @@ fn main() {
 
   win.end();
   win.show();
+  win.handle(move |_, evt| match evt {
+    Event::KeyDown => {
+      let key = app::event_key();
+      let text = app::event_text();
+      match key {
+        enums::Key::BackSpace => sender.send(BkSp),
+        enums::Key::Enter => sender.send(Eqs),
+        _ => {
+          match text.as_str() {
+            "(" => sender.send(Message::LPar),
+            ")" => sender.send(Message::RPar),
+            "." => sender.send(Message::Dec),
+            "+" => sender.send(Message::Plus),
+            "-" => sender.send(Message::Minus),
+            "*" => sender.send(Message::Mult),
+            "/" => sender.send(Message::Div),
+            "^" => sender.send(Message::Pow),
+            "=" => sender.send(Message::Eqs),
+            "0" => sender.send(Message::Num0),
+            "1" => sender.send(Message::Num1),
+            "2" => sender.send(Message::Num2),
+            "3" => sender.send(Message::Num3),
+            "4" => sender.send(Message::Num4),
+            "5" => sender.send(Message::Num5),
+            "6" => sender.send(Message::Num6),
+            "7" => sender.send(Message::Num7),
+            "8" => sender.send(Message::Num8),
+            "9" => sender.send(Message::Num9),
+            _ => (),
+          }
+        }
+      }
+      true
+    }
+    _ => false,
+  });
 
   while app.wait() {
     if let Some(msg) = reciever.recv() {
