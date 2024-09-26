@@ -1,6 +1,9 @@
-#[allow(dead_code)]
-use fltk::{prelude::*, button::Button, enums::{Color, FrameType}, app, *};
-use fltk::enums::Event;
+use fltk::{
+  app,
+  button::Button,
+  enums::{self, Color, Event, FrameType},
+  prelude::*,
+};
 
 use self::Message::*;
 
@@ -14,42 +17,38 @@ enum Message {
 
 impl std::fmt::Display for Message {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    match self {
-      Message::CE => write!(f, "CE"),
-      Message::C => write!(f, "C"),
-      Message::Pow => write!(f, "^"),
-      Message::BkSp => write!(f, "Back"),
-      Message::Mod => write!(f, "%"),
-      Message::Div => write!(f, "/"),
-      Message::Plus => write!(f, "+"),
-      Message::Minus => write!(f, "-"),
-      Message::Mult => write!(f, "*"),
-      Message::Dec => write!(f, "."),
-      Message::Eqs => write!(f, "="),
-      Message::Num0 => write!(f, "0"),
-      Message::Num1 => write!(f, "1"),
-      Message::Num2 => write!(f, "2"),
-      Message::Num3 => write!(f, "3"),
-      Message::Num4 => write!(f, "4"),
-      Message::Num5 => write!(f, "5"),
-      Message::Num6 => write!(f, "6"),
-      Message::Num7 => write!(f, "7"),
-      Message::Num8 => write!(f, "8"),
-      Message::Num9 => write!(f, "9")
-    }
+    let symbol = match self {
+      Message::CE => "CE",
+      Message::C => "C",
+      Message::Pow => "^",
+      Message::BkSp => "Back",
+      Message::Mod => "%",
+      Message::Div => "/",
+      Message::Plus => "+",
+      Message::Minus => "-",
+      Message::Mult => "*",
+      Message::Dec => ".",
+      Message::Eqs => "=",
+      Message::Num0 => "0",
+      Message::Num1 => "1",
+      Message::Num2 => "2",
+      Message::Num3 => "3",
+      Message::Num4 => "4",
+      Message::Num5 => "5",
+      Message::Num6 => "6",
+      Message::Num7 => "7",
+      Message::Num8 => "8",
+      Message::Num9 => "9",
+    };
+    write!(f, "{}", symbol)
   }
 }
 
 impl Message {
   pub fn iterator() -> std::slice::Iter<'static, Message> {
     static MESSAGES: [Message; 21] = [
-      CE, C, BkSp,
-      Mod, Pow, Div,
-      Plus, Minus, Mult,
-      Num7, Num8, Num9,
-      Num4, Num5,
-      Num6, Num1,
-      Num2, Num3,
+      CE, C, BkSp, Mod, Pow, Div, Plus, Minus, Mult,
+      Num7, Num8, Num9, Num4, Num5, Num6, Num1, Num2, Num3,
       Num0, Dec, Eqs
     ];
     MESSAGES.iter()
@@ -64,6 +63,7 @@ const DISPLAY_MARGIN_TOP: i32 = 20;
 const EDGE_DIST: i32 = 60;
 const WIN_HEIGHT: i32 = 480;
 const WIN_WIDTH: i32 = 400;
+const BUTTON_PADDING: i32 = 10;
 
 // COLOR CONSTANTS
 const COLOR_BLACK: Color = Color::from_rgb(0, 0, 0);
@@ -90,26 +90,28 @@ fn handle_keyboard_event_closure(sender: app::Sender<Message>) -> impl FnMut(&mu
         enums::Key::BackSpace => sender.send(BkSp),
         enums::Key::Enter => sender.send(Eqs),
         _ => {
-          match text.as_str() {
-            "%" => sender.send(Message::Mod),
-            "." => sender.send(Message::Dec),
-            "+" => sender.send(Message::Plus),
-            "-" => sender.send(Message::Minus),
-            "*" => sender.send(Message::Mult),
-            "/" => sender.send(Message::Div),
-            "^" => sender.send(Message::Pow),
-            "=" => sender.send(Message::Eqs),
-            "0" => sender.send(Message::Num0),
-            "1" => sender.send(Message::Num1),
-            "2" => sender.send(Message::Num2),
-            "3" => sender.send(Message::Num3),
-            "4" => sender.send(Message::Num4),
-            "5" => sender.send(Message::Num5),
-            "6" => sender.send(Message::Num6),
-            "7" => sender.send(Message::Num7),
-            "8" => sender.send(Message::Num8),
-            "9" => sender.send(Message::Num9),
-            _ => (),
+          if let Some(msg) = match text.as_str() {
+            "%" => Some(Message::Mod),
+            "." => Some(Message::Dec),
+            "+" => Some(Message::Plus),
+            "-" => Some(Message::Minus),
+            "*" => Some(Message::Mult),
+            "/" => Some(Message::Div),
+            "^" => Some(Message::Pow),
+            "=" => Some(Message::Eqs),
+            "0" => Some(Message::Num0),
+            "1" => Some(Message::Num1),
+            "2" => Some(Message::Num2),
+            "3" => Some(Message::Num3),
+            "4" => Some(Message::Num4),
+            "5" => Some(Message::Num5),
+            "6" => Some(Message::Num6),
+            "7" => Some(Message::Num7),
+            "8" => Some(Message::Num8),
+            "9" => Some(Message::Num9),
+            _ => None,
+          } {
+            sender.send(msg);
           }
         }
       }
@@ -141,15 +143,36 @@ fn handle_button_event_closure(sender: app::Sender<Message>, button_type: Messag
   }
 }
 
+// Display Creation Functions
+fn create_button(sender: app::Sender<Message>, button_type: Message, x: i32, y: i32) -> Button {
+  let butt_name = button_type.to_string();
+  let mut butt = Button::new(x, y, BUTT_WIDTH, BUTT_HEIGHT, &*butt_name);
+  butt.set_label_size(BUTTON_FONT_SIZE);
+  butt.set_frame(FrameType::RFlatBox);
+  butt.set_color(match button_type {
+    Message::CE => COLOR_LIGHT_PINK,
+    Message::C => COLOR_YELLOW,
+    Message::BkSp => COLOR_ORANGE,
+    Message::Eqs => COLOR_GREEN,
+    _ => COLOR_LIGHT_GRAY,
+  });
+  butt.set_label_color(COLOR_BLACK);
+  butt.set_label_font(FONT_TYPE);
+
+  let orig_color = butt.color();
+  butt.handle(handle_button_event_closure(sender, button_type, orig_color));
+  butt
+}
+
 fn main() {
   // State
   let mut display_string = String::new();
   let mut previous_string = String::new();
-  let mut opperation = String::new();
+  let mut operation = String::new();
   let mut solution_cache = String::new();
 
   // Emitter
-  let (sender, reciever) = app::channel::<Message>();
+  let (sender, receiver) = app::channel::<Message>();
 
   // App and Body
   let app = app::App::default();
@@ -164,37 +187,20 @@ fn main() {
   display_frame.set_frame(FrameType::RFlatBox);
 
   // Button Generation
-  let mut butt_count = 0;
-  let mut butts_per_row = 0;
+  let mut button_count = 0;
+  let mut buttons_per_row = 0;
   let mut y_offset = 50;
-  let button_padding = 10;
 
   for button_type in Message::iterator() {
-    let butt_name = button_type.to_string();
-
-    if butt_count % 3 == 0 {
-      butts_per_row = 0;
-      y_offset += BUTT_HEIGHT + button_padding;
+    if button_count % 3 == 0 {
+      buttons_per_row = 0;
+      y_offset += BUTT_HEIGHT + BUTTON_PADDING;
     }
-    let butt_dist = EDGE_DIST + (butts_per_row * (BUTT_WIDTH + button_padding));
-    let mut butt = Button::new(butt_dist, y_offset, BUTT_WIDTH, BUTT_HEIGHT, &*butt_name);
-    butt.set_label_size(BUTTON_FONT_SIZE);
-    butt.set_frame(FrameType::RFlatBox);
-    butt.set_color(match button_type {
-      Message::CE => COLOR_LIGHT_PINK,
-      Message::C => COLOR_YELLOW,
-      Message::BkSp => COLOR_ORANGE,
-      Message::Eqs => COLOR_GREEN,
-      _ => COLOR_LIGHT_GRAY,
-    });
-    butt.set_label_color(COLOR_BLACK);
-    butt.set_label_font(FONT_TYPE);
+    let x_offset = EDGE_DIST + (buttons_per_row * (BUTT_WIDTH + BUTTON_PADDING));
+    create_button(sender, *button_type, x_offset, y_offset);
 
-    let orig_color = butt.color();
-    butt.handle(handle_button_event_closure(sender, *button_type, orig_color));
-
-    butts_per_row += 1;
-    butt_count += 1;
+    buttons_per_row += 1;
+    button_count += 1;
   }
 
   win.end();
@@ -202,16 +208,16 @@ fn main() {
   win.handle(handle_keyboard_event_closure(sender));
 
   while app.wait() {
-    if let Some(msg) = reciever.recv() {
+    if let Some(msg) = receiver.recv() {
       match msg {
         BkSp => {
           display_string.pop();
-          display_frame.set_label(&display_string.clone());
+          display_frame.set_label(&display_string);
         }
         CE => {
           previous_string.clear();
           display_string.clear();
-          opperation.clear();
+          operation.clear();
           solution_cache.clear();
           display_frame.set_label(&display_string);
         }
@@ -223,34 +229,34 @@ fn main() {
           if !display_string.is_empty() {
             previous_string = display_string.clone();
             display_string.clear();
-            opperation = msg.to_string();
+            operation = msg.to_string();
             display_frame.set_label(&display_string);
           }
           if !solution_cache.is_empty() {
             previous_string = solution_cache.clone();
             solution_cache.clear();
             display_string.clear();
-            opperation = msg.to_string();
+            operation = msg.to_string();
             display_frame.set_label(&display_string);
           }
         }
         Eqs => {
           if !previous_string.is_empty() {
-            let pre_op: f64 = previous_string.parse().unwrap(); 
+            let pre_op: f64 = previous_string.parse().unwrap();
             let post_op: f64 = display_string.parse().unwrap();
-            
-            let solution = match opperation.as_str() {
+
+            let solution = match operation.as_str() {
               "+" => pre_op + post_op,
               "-" => pre_op - post_op,
               "*" => pre_op * post_op,
               "/" => pre_op / post_op,
-              "^" =>  f64::powf(pre_op, post_op),
+              "^" => f64::powf(pre_op, post_op),
               "%" => pre_op % post_op,
               _ => post_op,
             };
             display_string = solution.to_string();
             display_frame.set_label(&display_string);
-            opperation.clear();
+            operation.clear();
             solution_cache = display_string.clone();
           }
         }
@@ -258,7 +264,7 @@ fn main() {
           if !solution_cache.is_empty() {
             previous_string.clear();
             display_string.clear();
-            opperation.clear();
+            operation.clear();
             solution_cache.clear();
             display_frame.set_label(&display_string);
           } else {
